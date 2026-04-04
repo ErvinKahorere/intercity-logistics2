@@ -1,0 +1,1 @@
+function n(o={}){window.dispatchEvent(new CustomEvent("app-toast",{detail:o}))}function s(o,t="Success"){n({tone:"success",title:t,message:o})}function e(o,t="Something went wrong"){n({tone:"error",title:t,message:o})}function a(o,t="Update"){n({tone:"info",title:t,message:o})}export{e,a as i,s};
