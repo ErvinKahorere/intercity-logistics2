@@ -6,13 +6,11 @@ use App\Contracts\SmsProviderInterface;
 use App\Services\Sms\Providers\LogSmsProvider;
 use App\Services\Sms\Providers\TwilioSmsProvider;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         $this->app->bind(SmsProviderInterface::class, function ($app) {
@@ -20,9 +18,7 @@ class AppServiceProvider extends ServiceProvider
 
             return match ($providerKey) {
                 'twilio' => $app->make(TwilioSmsProvider::class),
-
                 'log' => $app->make(LogSmsProvider::class),
-
                 default => tap(
                     $app->make(LogSmsProvider::class),
                     function () use ($providerKey) {
@@ -35,9 +31,6 @@ class AppServiceProvider extends ServiceProvider
         });
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         if ($this->app->environment('production')) {
