@@ -2,13 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -23,6 +22,19 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at',
         'sms_notifications_enabled',
         'sms_notification_preferences',
+    ];
+
+    protected $appends = ['profile_photo_url'];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'sms_notifications_enabled' => 'boolean',
+        'sms_notification_preferences' => 'array',
     ];
 
     public function driver()
@@ -67,30 +79,17 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(SmsNotificationLog::class)->latest();
     }
 
+    public function savedDrivers()
+    {
+        return $this->belongsToMany(Driver::class, 'saved_drivers', 'user_id', 'driver_id')
+            ->withTimestamps();
+    }
+
     public function getProfilePhotoUrlAttribute(): string
     {
         return $this->profile_photo_path
             ? asset('storage/' . $this->profile_photo_path)
             : asset('/images/Default_pfp.jpg');
-    }
-
-    protected $appends = ['profile_photo_url'];
-
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'sms_notifications_enabled' => 'boolean',
-        'sms_notification_preferences' => 'array',
-    ];
-
-    public function savedDrivers()
-    {
-        return $this->belongsToMany(Driver::class, 'saved_drivers', 'user_id', 'driver_id')
-            ->withTimestamps();
     }
 
     public function hasRole(string ...$roles): bool
