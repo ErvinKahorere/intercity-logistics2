@@ -40,8 +40,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Intentionally left empty.
-        // Do NOT put Inertia::share or request-based logic here.
-        // Keep this worker-safe for FrankenPHP.
+        if ($this->app->environment('production')) {
+            URL::forceScheme('https');
+        }
     }
 }

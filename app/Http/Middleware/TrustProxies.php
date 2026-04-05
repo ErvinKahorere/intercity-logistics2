@@ -1,40 +1,18 @@
 <?php
 
-namespace App\Providers;
+namespace App\Http\Middleware;
 
-use App\Contracts\SmsProviderInterface;
-use App\Services\Sms\Providers\LogSmsProvider;
-use App\Services\Sms\Providers\TwilioSmsProvider;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\URL;
-use Illuminate\Support\ServiceProvider;
+use Illuminate\Http\Middleware\TrustProxies as Middleware;
+use Illuminate\Http\Request;
 
-class AppServiceProvider extends ServiceProvider
+class TrustProxies extends Middleware
 {
-    public function register(): void
-    {
-        $this->app->bind(SmsProviderInterface::class, function ($app) {
-            $providerKey = strtolower((string) config('sms.default', 'log'));
+    protected $proxies = '*';
 
-            return match ($providerKey) {
-                'twilio' => $app->make(TwilioSmsProvider::class),
-                'log' => $app->make(LogSmsProvider::class),
-                default => tap(
-                    $app->make(LogSmsProvider::class),
-                    function () use ($providerKey) {
-                        Log::warning('Unknown SMS provider configured. Falling back to log provider.', [
-                            'configured_provider' => $providerKey,
-                        ]);
-                    }
-                ),
-            };
-        });
-    }
-
-    public function boot(): void
-    {
-        if ($this->app->environment('production')) {
-            URL::forceScheme('https');
-        }
-    }
+    protected $headers =
+        Request::HEADER_X_FORWARDED_FOR |
+        Request::HEADER_X_FORWARDED_HOST |
+        Request::HEADER_X_FORWARDED_PORT |
+        Request::HEADER_X_FORWARDED_PROTO |
+        Request::HEADER_X_FORWARDED_AWS_ELB;
 }
