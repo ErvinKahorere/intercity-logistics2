@@ -5702,3 +5702,39 @@ into your web browser: <span class="break-all" style="box-sizing: border-box; fo
 [2026-04-04 23:36:14] testing.WARNING: SMS provider is unavailable. Skipping SMS dispatch. {"provider":"twilio","user_id":1,"event_type":"important_alert"} 
 [2026-04-04 23:51:25] testing.INFO: SMS notification {"provider":"log","to":"+264810000000","message":"InterCity: New delivery request Windhoek to Walvis Bay. Check your app now.","options":{"sender_id":"InterCity Logistics","from":null,"messaging_service_sid":null,"status_callback":null}} 
 [2026-04-04 23:51:25] testing.INFO: SMS notification {"provider":"log","to":"+264810000000","message":"InterCity: Your quotation QT-260404-DFEXY is ready.","options":{"sender_id":"InterCity Logistics","from":null,"messaging_service_sid":null,"status_callback":null}} 
+[2026-04-05 01:32:27] local.ERROR: include(E:\src\xamp\htdocs\InterCity_upgraded\vendor\composer/../simplesoftwareio/simple-qrcode/src/QrCodeServiceProvider.php): Failed to open stream: No such file or directory {"exception":"[object] (ErrorException(code: 0): include(E:\\src\\xamp\\htdocs\\InterCity_upgraded\\vendor\\composer/../simplesoftwareio/simple-qrcode/src/QrCodeServiceProvider.php): Failed to open stream: No such file or directory at E:/src/xamp/htdocs/InterCity_upgraded/vendor/composer/ClassLoader.php:582)
+[stacktrace]
+#0 E:/src/xamp/htdocs/InterCity_upgraded/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(258): Illuminate/Foundation/Bootstrap/HandleExceptions->handleError(2, 'include(E://src//...', 'E://src//xamp//htd...', 582)
+#1 E:/src/xamp/htdocs/InterCity_upgraded/vendor/composer/ClassLoader.php(582): Illuminate/Foundation/Bootstrap/HandleExceptions->Illuminate/Foundation/Bootstrap/{closure}(2, 'include(E://src//...', 'E://src//xamp//htd...', 582)
+#2 E:/src/xamp/htdocs/InterCity_upgraded/vendor/composer/ClassLoader.php(582): include('E://src//xamp//htd...')
+#3 E:/src/xamp/htdocs/InterCity_upgraded/vendor/composer/ClassLoader.php(433): Composer/Autoload/{closure}('E://src//xamp//htd...')
+#4 E:/src/xamp/htdocs/InterCity_upgraded/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(961): Composer/Autoload/ClassLoader->loadClass('SimpleSoftwareI...')
+#5 E:/src/xamp/htdocs/InterCity_upgraded/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(893): Illuminate/Foundation/Application->resolveProvider('SimpleSoftwareI...')
+#6 E:/src/xamp/htdocs/InterCity_upgraded/vendor/laravel/framework/src/Illuminate/Foundation/ProviderRepository.php(74): Illuminate/Foundation/Application->register('SimpleSoftwareI...')
+#7 E:/src/xamp/htdocs/InterCity_upgraded/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(871): Illuminate/Foundation/ProviderRepository->load(Array)
+#8 E:/src/xamp/htdocs/InterCity_upgraded/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/RegisterProviders.php(37): Illuminate/Foundation/Application->registerConfiguredProviders()
+#9 E:/src/xamp/htdocs/InterCity_upgraded/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(342): Illuminate/Foundation/Bootstrap/RegisterProviders->bootstrap(Object(Illuminate/Foundation/Application))
+#10 E:/src/xamp/htdocs/InterCity_upgraded/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(494): Illuminate/Foundation/Application->bootstrapWith(Array)
+#11 E:/src/xamp/htdocs/InterCity_upgraded/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(196): Illuminate/Foundation/Console/Kernel->bootstrap()
+#12 E:/src/xamp/htdocs/InterCity_upgraded/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1235): Illuminate/Foundation/Console/Kernel->handle(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#13 E:/src/xamp/htdocs/InterCity_upgraded/artisan(16): Illuminate/Foundation/Application->handleCommand(Object(Symfony/Component/Console/Input/ArgvInput))
+#14 {main}
+"} 
+[2026-04-05 01:32:28] local.ERROR: include(E:\src\xamp\htdocs\InterCity_upgraded\vendor\composer/../simplesoftwareio/simple-qrcode/src/QrCodeServiceProvider.php): Failed to open stream: No such file or directory {"exception":"[object] (ErrorException(code: 0): include(E:\\src\\xamp\\htdocs\\InterCity_upgraded\\vendor\\composer/../simplesoftwareio/simple-qrcode/src/QrCodeServiceProvider.php): Failed to open stream: No such file or directory at E:/src/xamp/htdocs/InterCity_upgraded/vendor/composer/ClassLoader.php:582)
+[stacktrace]
+#0 E:/src/xamp/htdocs/InterCity_upgraded/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(258): Illuminate/Foundation/Bootstrap/HandleExceptions->handleError(2, 'include(E://src//...', 'E://src//xamp//htd...', 582)
+#1 E:/src/xamp/htdocs/InterCity_upgraded/vendor/composer/ClassLoader.php(582): Illuminate/Foundation/Bootstrap/HandleExceptions->Illuminate/Foundation/Bootstrap/{closure}(2, 'include(E://src//...', 'E://src//xamp//htd...', 582)
+#2 E:/src/xamp/htdocs/InterCity_upgraded/vendor/composer/ClassLoader.php(582): include('E://src//xamp//htd...')
+#3 E:/src/xamp/htdocs/InterCity_upgraded/vendor/composer/ClassLoader.php(433): Composer/Autoload/{closure}('E://src//xamp//htd...')
+#4 E:/src/xamp/htdocs/InterCity_upgraded/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(961): Composer/Autoload/ClassLoader->loadClass('SimpleSoftwareI...')
+#5 E:/src/xamp/htdocs/InterCity_upgraded/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(893): Illuminate/Foundation/Application->resolveProvider('SimpleSoftwareI...')
+#6 E:/src/xamp/htdocs/InterCity_upgraded/vendor/laravel/framework/src/Illuminate/Foundation/ProviderRepository.php(74): Illuminate/Foundation/Application->register('SimpleSoftwareI...')
+#7 E:/src/xamp/htdocs/InterCity_upgraded/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(871): Illuminate/Foundation/ProviderRepository->load(Array)
+#8 E:/src/xamp/htdocs/InterCity_upgraded/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/RegisterProviders.php(37): Illuminate/Foundation/Application->registerConfiguredProviders()
+#9 E:/src/xamp/htdocs/InterCity_upgraded/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(342): Illuminate/Foundation/Bootstrap/RegisterProviders->bootstrap(Object(Illuminate/Foundation/Application))
+#10 E:/src/xamp/htdocs/InterCity_upgraded/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(494): Illuminate/Foundation/Application->bootstrapWith(Array)
+#11 E:/src/xamp/htdocs/InterCity_upgraded/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(196): Illuminate/Foundation/Console/Kernel->bootstrap()
+#12 E:/src/xamp/htdocs/InterCity_upgraded/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1235): Illuminate/Foundation/Console/Kernel->handle(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#13 E:/src/xamp/htdocs/InterCity_upgraded/artisan(16): Illuminate/Foundation/Application->handleCommand(Object(Symfony/Component/Console/Input/ArgvInput))
+#14 {main}
+"} 
