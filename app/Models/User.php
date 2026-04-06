@@ -22,6 +22,10 @@ class User extends Authenticatable
         'email_verified_at',
         'sms_notifications_enabled',
         'sms_notification_preferences',
+        'whatsapp_notifications_enabled',
+        'whatsapp_notification_preferences',
+        'email_notifications_enabled',
+        'email_notification_preferences',
     ];
 
     protected $appends = ['profile_photo_url'];
@@ -35,6 +39,10 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'sms_notifications_enabled' => 'boolean',
         'sms_notification_preferences' => 'array',
+        'whatsapp_notifications_enabled' => 'boolean',
+        'whatsapp_notification_preferences' => 'array',
+        'email_notifications_enabled' => 'boolean',
+        'email_notification_preferences' => 'array',
     ];
 
     public function driver()

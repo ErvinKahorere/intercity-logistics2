@@ -53,7 +53,7 @@ class ParcelWorkflowService
         private PricingService $pricingService,
         private QuotationService $quotationService,
         private InvoiceService $invoiceService,
-        private SmsService $smsService,
+        private NotificationService $notificationService,
     ) {
     }
 
@@ -90,9 +90,21 @@ class ParcelWorkflowService
                 : 'Tracking number issued and route pricing prepared.';
 
             $this->logStatus($parcelRequest, ParcelRequest::STATUS_PENDING, 'system');
-            $this->notifyUser($customer, $parcelRequest, 'Request created', $requestMessage, 'Created', 'info', 'request_created', [
-                'estimated_price' => $parcelRequest->total_price,
-                'client_offer_price' => $parcelRequest->client_offer_price,
+            $this->notificationService->send($customer, $parcelRequest, [
+                'title' => 'Request created',
+                'message' => $requestMessage,
+                'badge' => 'Created',
+                'tone' => 'info',
+                'event_type' => 'request_created',
+                'template_key' => 'general.important_alert',
+                'preference_key' => 'important_alerts',
+                'context' => ['message' => $requestMessage],
+                'meta' => [
+                    'estimated_price' => $parcelRequest->total_price,
+                    'client_offer_price' => $parcelRequest->client_offer_price,
+                    'tracking_number' => $parcelRequest->tracking_number,
+                ],
+                'email_subject' => 'Your InterCity request is live',
             ]);
 
             $matches = $this->matchDrivers($parcelRequest, $validated);
@@ -208,17 +220,26 @@ class ParcelWorkflowService
             );
 
             if ($driver->user && $newlyMatchedIds->contains($driver->id)) {
-                $this->notifyUser(
-                    $driver->user,
-                    $parcelRequest,
-                    'New matching request',
-                    $parcelRequest->hasClientOffer()
+                $this->notificationService->send($driver->user, $parcelRequest, [
+                    'title' => 'New matching request',
+                    'message' => $parcelRequest->hasClientOffer()
                         ? $summary . sprintf(' | Offer N$ %s', number_format((float) $parcelRequest->client_offer_price, 2))
                         : $summary,
-                    'Match',
-                    $preferredDriverId === $driver->id ? 'success' : 'info',
-                    $preferredDriverId === $driver->id ? 'preferred_driver_match' : 'driver_match',
-                    [
+                    'badge' => 'Match',
+                    'tone' => $preferredDriverId === $driver->id ? 'success' : 'info',
+                    'event_type' => $preferredDriverId === $driver->id ? 'preferred_driver_match' : 'driver_match',
+                    'template_key' => in_array($parcelRequest->urgency_level, ['express', 'same_day'], true)
+                        ? 'driver.urgent_job_alert'
+                        : 'driver.new_matching_request',
+                    'preference_key' => in_array($parcelRequest->urgency_level, ['express', 'same_day'], true)
+                        ? 'urgent_job_alert'
+                        : 'driver_match',
+                    'context' => [
+                        'pickup' => $parcelRequest->pickupLocation?->name,
+                        'destination' => $parcelRequest->dropoffLocation?->name,
+                        'tracking' => $parcelRequest->tracking_number,
+                    ],
+                    'meta' => [
                         'match_score' => $driver->match_score,
                         'estimated_price' => $parcelRequest->total_price,
                         'client_offer_price' => $parcelRequest->client_offer_price,
@@ -226,33 +247,11 @@ class ParcelWorkflowService
                         'match_badges' => $driver->match_badges ?? [],
                         'match_label' => $driver->match_label ?? null,
                         'preferred_driver' => $preferredDriverId === $driver->id,
-                    ]
-                );
-
-                $this->smsService->queueTemplate(
-                    $driver->user,
-                    in_array($parcelRequest->urgency_level, ['express', 'same_day'], true)
-                        ? 'driver.urgent_job_alert'
-                        : 'driver.new_matching_request',
-                    [
-                        'pickup' => $parcelRequest->pickupLocation?->name,
-                        'destination' => $parcelRequest->dropoffLocation?->name,
-                        'tracking' => $parcelRequest->tracking_number,
+                        'urgency_level' => $parcelRequest->urgency_level,
+                        'tracking_number' => $parcelRequest->tracking_number,
                     ],
-                    [
-                        'event_type' => in_array($parcelRequest->urgency_level, ['express', 'same_day'], true)
-                            ? 'driver_urgent_job_alert'
-                            : 'driver_new_matching_request',
-                        'preference_key' => in_array($parcelRequest->urgency_level, ['express', 'same_day'], true)
-                            ? 'urgent_job_alert'
-                            : 'driver_match',
-                        'parcel_request_id' => $parcelRequest->id,
-                        'meta' => [
-                            'match_score' => $driver->match_score,
-                            'urgency_level' => $parcelRequest->urgency_level,
-                        ],
-                    ]
-                );
+                    'email_subject' => 'New InterCity delivery request match',
+                ]);
             }
         }
 
@@ -330,67 +329,66 @@ class ParcelWorkflowService
             ]);
 
             if ($driver->user) {
-                $this->smsService->queueTemplate(
-                    $driver->user,
-                    'driver.job_accepted',
-                    [
+                $this->notificationService->send($driver->user, $parcelRequest, [
+                    'title' => 'Job accepted',
+                    'message' => sprintf('You accepted parcel %s. Pickup at %s.', $parcelRequest->tracking_number, $parcelRequest->pickupLocation?->name ?? 'the pickup point'),
+                    'badge' => 'Accepted',
+                    'tone' => 'success',
+                    'event_type' => 'driver_job_accepted',
+                    'template_key' => 'driver.job_accepted',
+                    'preference_key' => 'job_accepted',
+                    'context' => [
                         'tracking' => $parcelRequest->tracking_number,
                         'pickup' => $parcelRequest->pickupLocation?->name,
                     ],
-                    [
-                        'event_type' => 'driver_job_accepted',
-                        'preference_key' => 'job_accepted',
-                        'parcel_request_id' => $parcelRequest->id,
-                    ]
-                );
+                    'meta' => [
+                        'tracking_number' => $parcelRequest->tracking_number,
+                        'final_price' => $acceptedPrice,
+                    ],
+                    'email_subject' => 'InterCity job accepted',
+                ]);
             }
 
             if ($parcelRequest->customer) {
-                $this->notifyUser(
-                    $parcelRequest->customer,
-                    $parcelRequest,
-                    'Driver assigned',
-                    $parcelRequest->hasClientOffer()
-                        ? sprintf('%s accepted your offer of N$ %s for delivery from %s to %s.', $driver->user?->name ?? 'A driver', number_format($acceptedPrice, 2), $parcelRequest->pickupLocation?->name ?? 'pickup', $parcelRequest->dropoffLocation?->name ?? 'dropoff')
-                        : sprintf('%s accepted your delivery from %s to %s.', $driver->user?->name ?? 'A driver', $parcelRequest->pickupLocation?->name ?? 'pickup', $parcelRequest->dropoffLocation?->name ?? 'dropoff'),
-                    'Accepted',
-                    'success',
-                    'driver_assigned',
-                    [
-                        'final_price' => $acceptedPrice,
-                        'client_offer_price' => $parcelRequest->client_offer_price,
-                    ]
-                );
+                $assignedMessage = $parcelRequest->hasClientOffer()
+                    ? sprintf('%s accepted your offer of N$ %s for delivery from %s to %s.', $driver->user?->name ?? 'A driver', number_format($acceptedPrice, 2), $parcelRequest->pickupLocation?->name ?? 'pickup', $parcelRequest->dropoffLocation?->name ?? 'dropoff')
+                    : sprintf('%s accepted your delivery from %s to %s.', $driver->user?->name ?? 'A driver', $parcelRequest->pickupLocation?->name ?? 'pickup', $parcelRequest->dropoffLocation?->name ?? 'dropoff');
 
-                $this->smsService->queueTemplate(
-                    $parcelRequest->customer,
-                    'customer.driver_assigned',
-                    [
+                $this->notificationService->send($parcelRequest->customer, $parcelRequest, [
+                    'title' => 'Driver assigned',
+                    'message' => $assignedMessage,
+                    'badge' => 'Accepted',
+                    'tone' => 'success',
+                    'event_type' => 'driver_assigned',
+                    'template_key' => 'customer.driver_assigned',
+                    'preference_key' => 'driver_assigned',
+                    'context' => [
                         'pickup' => $parcelRequest->pickupLocation?->name,
                         'destination' => $parcelRequest->dropoffLocation?->name,
                         'tracking' => $parcelRequest->tracking_number,
                         'driver' => $driver->user?->name ?? 'your driver',
                     ],
-                    [
-                        'event_type' => 'customer_driver_assigned',
-                        'preference_key' => 'driver_assigned',
-                        'parcel_request_id' => $parcelRequest->id,
-                    ]
-                );
+                    'meta' => [
+                        'final_price' => $acceptedPrice,
+                        'client_offer_price' => $parcelRequest->client_offer_price,
+                        'tracking_number' => $parcelRequest->tracking_number,
+                    ],
+                    'email_subject' => 'Your driver has been assigned',
+                ]);
             }
 
             $otherDrivers = Driver::query()->whereIn('id', Arr::where($eligibleDriverIds, fn ($id) => $id !== $driver->id))->with('user')->get();
             foreach ($otherDrivers as $otherDriver) {
                 if ($otherDriver->user) {
-                    $this->notifyUser(
-                        $otherDriver->user,
-                        $parcelRequest,
-                        'Request no longer available',
-                        sprintf('Parcel %s was accepted by another driver.', $parcelRequest->tracking_number),
-                        'Taken',
-                        'warning',
-                        'request_taken'
-                    );
+                    $this->notificationService->send($otherDriver->user, $parcelRequest, [
+                        'title' => 'Request no longer available',
+                        'message' => sprintf('Parcel %s was accepted by another driver.', $parcelRequest->tracking_number),
+                        'badge' => 'Taken',
+                        'tone' => 'warning',
+                        'event_type' => 'request_taken',
+                        'channels' => [],
+                        'meta' => ['tracking_number' => $parcelRequest->tracking_number],
+                    ]);
                 }
             }
 
@@ -437,16 +435,6 @@ class ParcelWorkflowService
 
             if ($parcelRequest->customer) {
                 $meta = self::STATUS_META[$status];
-                $this->notifyUser(
-                    $parcelRequest->customer,
-                    $parcelRequest,
-                    $meta['title'],
-                    $meta['message'],
-                    Str::headline(str_replace('_', ' ', $status)),
-                    $this->notificationToneForStatus($status),
-                    'parcel_' . $status
-                );
-
                 $templateKey = match ($status) {
                     ParcelRequest::STATUS_PICKED_UP => 'customer.parcel_picked_up',
                     ParcelRequest::STATUS_IN_TRANSIT, ParcelRequest::STATUS_ARRIVED => 'customer.parcel_in_transit',
@@ -461,36 +449,42 @@ class ParcelWorkflowService
                     default => null,
                 };
 
-                if ($templateKey && $preferenceKey) {
-                    $this->smsService->queueTemplate(
-                        $parcelRequest->customer,
-                        $templateKey,
-                        [
-                            'pickup' => $parcelRequest->pickupLocation?->name,
-                            'destination' => $parcelRequest->dropoffLocation?->name,
-                            'tracking' => $parcelRequest->tracking_number,
-                            'driver' => $driver->user?->name ?? 'your driver',
-                        ],
-                        [
-                            'event_type' => 'customer_' . $status,
-                            'preference_key' => $preferenceKey,
-                            'parcel_request_id' => $parcelRequest->id,
-                        ]
-                    );
-                }
+                $this->notificationService->send($parcelRequest->customer, $parcelRequest, [
+                    'title' => $meta['title'],
+                    'message' => $meta['message'],
+                    'badge' => Str::headline(str_replace('_', ' ', $status)),
+                    'tone' => $this->notificationToneForStatus($status),
+                    'event_type' => 'parcel_' . $status,
+                    'template_key' => $templateKey,
+                    'preference_key' => $preferenceKey,
+                    'context' => [
+                        'pickup' => $parcelRequest->pickupLocation?->name,
+                        'destination' => $parcelRequest->dropoffLocation?->name,
+                        'tracking' => $parcelRequest->tracking_number,
+                        'driver' => $driver->user?->name ?? 'your driver',
+                    ],
+                    'meta' => [
+                        'tracking_number' => $parcelRequest->tracking_number,
+                        'status' => $status,
+                    ],
+                    'email_subject' => 'Parcel update: ' . $meta['title'],
+                ]);
             }
 
             if ($driver->user) {
                 $meta = self::STATUS_META[$status];
-                $this->notifyUser(
-                    $driver->user,
-                    $parcelRequest,
-                    $meta['title'],
-                    sprintf('Parcel %s is now %s.', $parcelRequest->tracking_number, str_replace('_', ' ', $status)),
-                    'Update',
-                    'info',
-                    'driver_delivery_update'
-                );
+                $this->notificationService->send($driver->user, $parcelRequest, [
+                    'title' => $meta['title'],
+                    'message' => sprintf('Parcel %s is now %s.', $parcelRequest->tracking_number, str_replace('_', ' ', $status)),
+                    'badge' => 'Update',
+                    'tone' => 'info',
+                    'event_type' => 'driver_delivery_update',
+                    'channels' => [],
+                    'meta' => [
+                        'tracking_number' => $parcelRequest->tracking_number,
+                        'status' => $status,
+                    ],
+                ]);
             }
 
             return $parcelRequest->fresh(['assignedDriver.user', 'statusUpdates']);
@@ -520,14 +514,13 @@ class ParcelWorkflowService
         string $eventType = 'general',
         array $meta = []
     ): AppNotification {
-        return AppNotification::create([
-            'user_id' => $user->id,
-            'parcel_request_id' => $parcelRequest?->id,
+        return $this->notificationService->send($user, $parcelRequest, [
             'title' => $title,
             'message' => $message,
             'badge' => $badge,
             'tone' => $tone,
             'event_type' => $eventType,
+            'channels' => [],
             'meta' => $meta,
         ]);
     }

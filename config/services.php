@@ -40,6 +40,9 @@ return [
         'token' => env('TWILIO_AUTH_TOKEN'),
         'from' => env('TWILIO_SMS_FROM', env('TWILIO_FROM')),
         'messaging_service_sid' => env('TWILIO_MESSAGING_SERVICE_SID'),
+        'whatsapp_enabled' => filter_var(env('TWILIO_WHATSAPP_ENABLED', false), FILTER_VALIDATE_BOOL),
+        'whatsapp_from' => env('TWILIO_WHATSAPP_FROM'),
+        'whatsapp_status_callback' => env('TWILIO_WHATSAPP_STATUS_CALLBACK'),
     ],
 
 ];

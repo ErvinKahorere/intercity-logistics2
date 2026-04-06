@@ -16,7 +16,7 @@ defineProps({
     <Head title="Profile" />
 
     <AuthenticatedLayout>
-        <PageHeader eyebrow="Account settings" title="Profile" description="Manage your personal details, password, and account settings." />
+        <PageHeader eyebrow="Account settings" title="Profile" description="Manage your personal details, passwords, and notification channels from one place." />
 
         <div class="grid gap-6">
             <div class="app-panel p-6 sm:p-8">
