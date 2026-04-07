@@ -5738,3 +5738,12 @@ into your web browser: <span class="break-all" style="box-sizing: border-box; fo
 #13 E:/src/xamp/htdocs/InterCity_upgraded/artisan(16): Illuminate/Foundation/Application->handleCommand(Object(Symfony/Component/Console/Input/ArgvInput))
 #14 {main}
 "} 
+[2026-04-07 08:12:41] local.ERROR: Command "logs" is not defined. {"exception":"[object] (Symfony\\Component\\Console\\Exception\\CommandNotFoundException(code: 0): Command \"logs\" is not defined. at E:/src/xamp/htdocs/InterCity_upgraded/vendor/symfony/console/Application.php:759)
+[stacktrace]
+#0 E:/src/xamp/htdocs/InterCity_upgraded/vendor/symfony/console/Application.php(298): Symfony/Component/Console/Application->find('logs')
+#1 E:/src/xamp/htdocs/InterCity_upgraded/vendor/symfony/console/Application.php(195): Symfony/Component/Console/Application->doRun(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#2 E:/src/xamp/htdocs/InterCity_upgraded/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(198): Symfony/Component/Console/Application->run(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#3 E:/src/xamp/htdocs/InterCity_upgraded/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1235): Illuminate/Foundation/Console/Kernel->handle(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#4 E:/src/xamp/htdocs/InterCity_upgraded/artisan(16): Illuminate/Foundation/Application->handleCommand(Object(Symfony/Component/Console/Input/ArgvInput))
+#5 {main}
+"} 
