@@ -54,6 +54,8 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    'skip_email_verification' => (bool) env('APP_SKIP_EMAIL_VERIFICATION', true),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

@@ -27,6 +27,8 @@ class RegisteredDriverController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $skipEmailVerification = config('app.skip_email_verification');
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:' . User::class],
@@ -42,6 +44,7 @@ class RegisteredDriverController extends Controller
             'location' => $data['location'] ?? null,
             'password' => Hash::make($data['password']),
             'role' => 'Driver',
+            'email_verified_at' => $skipEmailVerification ? now() : null,
         ]);
 
         Driver::create([
@@ -51,7 +54,9 @@ class RegisteredDriverController extends Controller
             'status' => 'active',
         ]);
 
-        event(new Registered($user));
+        if (! $skipEmailVerification) {
+            event(new Registered($user));
+        }
 
         return redirect()->route('login')->with('success', 'Driver account created successfully. Please sign in.');
     }

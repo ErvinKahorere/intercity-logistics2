@@ -31,6 +31,8 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $skipEmailVerification = config('app.skip_email_verification');
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:'.User::class,
@@ -41,13 +43,14 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'user'
+            'role' => 'user',
+            'email_verified_at' => $skipEmailVerification ? now() : null,
 
             ]);
 
-     //   dd($request->all());
-
-        event(new Registered($user));
+        if (! $skipEmailVerification) {
+            event(new Registered($user));
+        }
 
         Auth::login($user);
 

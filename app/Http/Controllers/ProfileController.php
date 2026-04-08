@@ -34,7 +34,7 @@ class ProfileController extends Controller
         $user->fill($validated);
 
         if ($user->isDirty('email')) {
-            $user->email_verified_at = null;
+            $user->email_verified_at = config('app.skip_email_verification') ? now() : null;
         }
 
         // Handle profile photo upload
