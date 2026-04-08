@@ -6,6 +6,7 @@ use App\Http\Controllers\Driver\DriverRoutesController;
 use App\Http\Controllers\Driver\DriverProfileController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ParcelRequestController as WebParcelRequestController;
+use App\Models\User;
 use App\Models\Location;
 use App\Models\PackageType;
 use Illuminate\Http\Request;
@@ -18,6 +19,15 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::get('/drivers', [DriverController::class, 'index']);
 Route::get('/locations', fn () => response()->json(Location::orderBy('name')->get(['id', 'name'])));
 Route::get('/package-types', fn () => response()->json(PackageType::orderBy('name')->get(['id', 'name'])));
+Route::post('/email-check', function (Request $request) {
+    $validated = $request->validate([
+        'email' => ['required', 'email'],
+    ]);
+
+    return response()->json([
+        'available' => ! User::where('email', $validated['email'])->exists(),
+    ]);
+});
 Route::middleware('auth:sanctum')->get('/parcel-requests', [ParcelRequestController::class, 'index']);
 
 
