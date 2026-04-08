@@ -2,13 +2,14 @@
 import { computed } from "vue";
 import GuestLayout from "@/Layouts/GuestLayout.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
-import { Head, Link, useForm } from "@inertiajs/vue3";
+import { Head, Link, useForm, usePage } from "@inertiajs/vue3";
 
 const props = defineProps({
     status: String,
 });
 
 const form = useForm({});
+const page = usePage();
 
 const submit = () => {
     form.post(route("verification.send"));
@@ -17,6 +18,8 @@ const submit = () => {
 const verificationLinkSent = computed(
     () => props.status === "verification-link-sent"
 );
+
+const verificationError = computed(() => page.props.flash?.error);
 </script>
 
 <template>
@@ -35,6 +38,13 @@ const verificationLinkSent = computed(
         >
             A new verification link has been sent to the email address you
             provided during registration.
+        </div>
+
+        <div
+            class="mb-4 text-sm text-red-600"
+            v-if="verificationError"
+        >
+            {{ verificationError }}
         </div>
 
         <form @submit.prevent="submit">
